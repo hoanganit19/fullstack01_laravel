@@ -1,0 +1,1 @@
+<h1>BẠN KHÔNG CÓ QUYỀN TRUY CẬP TRANG NÀY</h1>
