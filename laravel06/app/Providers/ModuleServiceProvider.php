@@ -4,15 +4,40 @@ namespace App\Providers;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Modules\User\src\Commands\TestCommand;
+use Modules\User\src\Http\Middlewares\TestMiddleware;
+use Modules\User\src\Repositories\UserRepository;
+use Modules\User\src\Repositories\UserRepositoryInterface;
 
 class ModuleServiceProvider extends ServiceProvider
 {
-/**
- * Register any application services.
- */
+
+    private $moduleFolder = "modules";
+
+    private $middlewares = [
+        'test' => TestMiddleware::class,
+    ];
+
+    private $commands = [
+        TestCommand::class,
+    ];
+
     public function register(): void
     {
+        $modules = $this->getModules();
 
+        foreach ($modules as $module) {
+            $this->loadConfig($module);
+        }
+
+        $this->loadMiddleware();
+
+        $this->commands($this->commands);
+
+        $this->app->singleton(
+            UserRepositoryInterface::class,
+            UserRepository::class
+        );
     }
 
     /**
@@ -20,9 +45,7 @@ class ModuleServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $modulePath = base_path() . '/modules';
-
-        $modules = File::directories($modulePath);
+        $modules = $this->getModules();
 
         if ($modules) {
             //$modules = array_map('basename', $modules); //basename() => trả về tên của 1 đường dẫn
@@ -31,6 +54,15 @@ class ModuleServiceProvider extends ServiceProvider
             }
         }
 
+    }
+
+    public function getModules()
+    {
+        $modulePath = base_path() . '/' . $this->moduleFolder;
+
+        $modules = File::directories($modulePath);
+
+        return $modules;
     }
 
     public function registerModule($path)
@@ -64,6 +96,25 @@ class ModuleServiceProvider extends ServiceProvider
         if (File::exists($path . '/resources/views')) {
             //language file php
             $this->loadViewsFrom($path . '/resources/views', strtolower(basename($path)));
+        }
+    }
+
+    public function loadConfig($path)
+    {
+        $configFolder = $path . '/configs';
+        $files = File::allFiles($configFolder);
+        foreach ($files as $file) {
+            $alias = pathinfo($file)['filename'];
+
+            $this->mergeConfigFrom($file, $alias);
+        }
+    }
+
+    public function loadMiddleware()
+    {
+        $middlewares = $this->middlewares;
+        foreach ($middlewares as $key => $middleware) {
+            $this->app['router']->pushMiddlewareToGroup($key, $middleware);
         }
     }
 }

@@ -14,10 +14,10 @@ class RepositoryServiceProvider extends ServiceProvider
     public function register(): void
     {
         //User
-        $this->app->singleton(
-            UserRepositoryInterface::class,
-            MongoUserRepository::class
-        );
+        // $this->app->singleton(
+        //     UserRepositoryInterface::class,
+        //     MongoUserRepository::class
+        // );
 
         //Product
 

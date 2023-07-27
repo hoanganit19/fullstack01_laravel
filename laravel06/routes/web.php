@@ -21,6 +21,6 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/users/create', [UserController::class, 'create']);
 // Route::get('/users/{id}', [UserController::class, 'get']);
 
-Route::get('/products', function () {
-    return '<h1>Products</h1>';
-});
+// Route::get('/products', function () {
+//     return '<h1>Products</h1>';
+// });
